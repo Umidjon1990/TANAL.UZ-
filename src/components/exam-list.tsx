@@ -1,5 +1,6 @@
 import type { ExamDate, TestCenter, TelegramPostLog } from "@prisma/client";
-import { Clock, MapPin, Phone, Users } from "lucide-react";
+import Link from "next/link";
+import { Clock, MapPin, Navigation, Phone, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { statusLabels, statusTone } from "@/lib/labels";
@@ -52,6 +53,17 @@ export function ExamList({ exams, showStatus = false }: { exams: ExamWithCenter[
               {exam.description ? <span>Izoh: {exam.description}</span> : null}
               {exam.rejectionReason ? <span>Rad etish sababi: {exam.rejectionReason}</span> : null}
               {exam.telegramPostLog ? <span>Telegram: {exam.telegramPostLog.status}</span> : null}
+            </div>
+            <div className="flex flex-wrap gap-2 border-t pt-3">
+              <Link className="inline-flex h-9 items-center justify-center rounded-md border px-3 text-sm font-medium hover:bg-accent" href={`/centers/${exam.testCenter.id}`}>
+                Markaz haqida
+              </Link>
+              {exam.testCenter.locationUrl ? (
+                <a className="inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium hover:bg-accent" href={exam.testCenter.locationUrl} target="_blank" rel="noreferrer">
+                  <Navigation className="h-4 w-4" />
+                  Lokatsiya
+                </a>
+              ) : null}
             </div>
           </CardContent>
         </Card>

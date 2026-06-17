@@ -1,6 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
-import { Bot, CalendarDays, CheckCircle2, MapPin, Search } from "lucide-react";
+import { Bot, CalendarDays, CheckCircle2, MapPin, Navigation, Search } from "lucide-react";
 import { AppHeader } from "@/components/app-header";
 import { ExamList } from "@/components/exam-list";
 import { HeroMotion } from "@/components/hero-motion";
@@ -49,8 +49,8 @@ export default async function HomePage() {
               </CardHeader>
               <CardContent>
                 <form action="/exams" className="space-y-3">
-                  <Input name="region" placeholder="Hudud" />
-                  <Input name="date" type="date" />
+                  <Input name="region" placeholder="Viloyat" />
+                  <Input name="month" type="month" />
                   <Input name="center" placeholder="Test markazi" />
                   <Button className="w-full"><Search className="h-4 w-4" /> Qidirish</Button>
                 </form>
@@ -82,7 +82,14 @@ export default async function HomePage() {
                   <CardContent className="space-y-2 text-sm text-muted-foreground">
                     <p className="flex gap-2"><MapPin className="h-4 w-4" /> {center.region}, {center.district}</p>
                     <p>{center.address}</p>
-                    <Button asChild variant="outline" size="sm"><Link href={`/centers/${center.id}`}>Batafsil</Link></Button>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Button asChild variant="outline" size="sm"><Link href={`/centers/${center.id}`}>Batafsil</Link></Button>
+                      {center.locationUrl ? (
+                        <Button asChild variant="secondary" size="sm">
+                          <a href={center.locationUrl} target="_blank" rel="noreferrer"><Navigation className="h-4 w-4" /> Lokatsiya</a>
+                        </Button>
+                      ) : null}
+                    </div>
                   </CardContent>
                 </Card>
               ))}
