@@ -1,0 +1,129 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  SUPER_ADMIN
+  CENTER_ADMIN
+}
+
+enum ExamStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+  EXPIRED
+}
+
+model User {
+  id              String       @id @default(cuid())
+  name            String
+  username        String       @unique
+  passwordHash    String
+  role            Role
+  testCenterId    String?
+  testCenter      TestCenter?  @relation(fields: [testCenterId], references: [id], onDelete: SetNull)
+  isActive        Boolean      @default(true)
+  approvedExams   ExamDate[]   @relation("ExamApprovedBy")
+  auditLogs       AuditLog[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([role])
+  @@index([testCenterId])
+  @@index([isActive])
+}
+
+model TestCenter {
+  id          String     @id @default(cuid())
+  name        String
+  description String?
+  imageUrl    String?
+  region      String
+  district    String
+  address     String
+  locationUrl String?
+  phone       String
+  telegram    String?
+  isActive    Boolean    @default(true)
+  users       User[]
+  examDates   ExamDate[]
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+
+  @@index([region])
+  @@index([district])
+  @@index([isActive])
+}
+
+model ExamDate {
+  id              String           @id @default(cuid())
+  testCenterId    String
+  testCenter      TestCenter       @relation(fields: [testCenterId], references: [id], onDelete: Cascade)
+  examDate        DateTime
+  startTime       String
+  endTime         String
+  seatsLimit      Int
+  price           Int
+  description     String?
+  status          ExamStatus       @default(PENDING)
+  approvedById    String?
+  approvedBy      User?            @relation("ExamApprovedBy", fields: [approvedById], references: [id], onDelete: SetNull)
+  approvedAt      DateTime?
+  rejectedAt      DateTime?
+  rejectionReason String?
+  telegramPostLog TelegramPostLog?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([testCenterId, status])
+  @@index([examDate])
+  @@index([status])
+  @@index([approvedById])
+}
+
+model News {
+  id          String    @id @default(cuid())
+  title       String
+  slug        String    @unique
+  content     String
+  imageUrl    String?
+  isPublished Boolean   @default(false)
+  publishedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([isPublished, publishedAt])
+}
+
+model TelegramPostLog {
+  id                String   @id @default(cuid())
+  examDateId        String   @unique
+  examDate          ExamDate @relation(fields: [examDateId], references: [id], onDelete: Cascade)
+  telegramMessageId String?
+  status            String
+  errorMessage      String?
+  createdAt         DateTime @default(now())
+
+  @@index([status])
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  action     String
+  entityType String
+  entityId   String
+  details    Json?
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
